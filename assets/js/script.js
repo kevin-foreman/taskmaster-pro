@@ -17,6 +17,7 @@ var auditTask = function(taskEl) {
   else if (Math.abs(moment().diff(time, "days")) <= 2) {
     $(taskEl).addClass("list-group-item-warning");
   }
+  // console.log(taskEl)
 };
 
 var createTask = function(taskText, taskDate, taskList) {
@@ -82,15 +83,22 @@ $(".card .list-group").sortable({
   tolerance: "pointer",
   helper: "clone",
   activate: function(event) {
+    $("bottom-trash").addClass("bottom-trash-drag");
+    $(this).addClass("dropover");
+    
     console.log("activate", this);
   },
   deactivate: function(event) {
+    $("bottom-trash").removeClass("bottom-trash-drag");
+    $(this).removeClass("dropover");
     console.log("deactivate", this);
   },
   over: function(event) {
+    $(event.target).addClass("dropover-active")
     console.log("over", event.target);
   },
   out: function(event) {
+    $(event.target).removeClass("dropover-active")
     console.log("out", event.target);
   },
   update: function(event) {
@@ -137,19 +145,22 @@ $("#trash").droppable({
   accept: ".card .list-group-item",
   tolerance: "touch",
   drop: function(event, ui) {
+    $("bottom-trash").removeClass("bottom-trash-active");
     ui.draggable.remove();
     console.log("drop");
   },
   over: function(event, ui) {
+    $("bottom-trash").addClass("bottom-trash-active");
     console.log("over");
   },
   out: function(event, ui) {
+    $("bottom-trash").removeClass("bottom-trash-active");
     console.log("out");
   }
 });
 
 // save button in modal was clicked
-$("#task-form-modal .btn-primary").click(function() {
+$("#task-form-modal .btn-save").click(function() {
   // get form values
   var taskText = $("#modalTaskDescription").val();
   var taskDate = $("#modalDueDate").val();
@@ -241,6 +252,12 @@ $(".list-group").on("click", "span", function() {
   // automatically bring up the calendar
   dateInput.trigger("focus");
 });
+
+setInterval(function () {
+  $(".card .list-group-item").each(function(index, el) {
+    auditTask(el);
+  });
+}, (1000 * 60) * 30);
 
 // value of due date was changed
 $(".list-group").on("change", "input[type='text']", function() {
